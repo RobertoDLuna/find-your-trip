@@ -9,7 +9,13 @@ const PORT = 8080;
 const dotenvtest = dotenv.config();
 console.log(dotenvtest);
 const arrayDrivers = readDatabase();
-console.log(arrayDrivers.drivers);
+const currentSearch = {
+  customer_id: "",
+  origin: "",
+  destination: "",
+  distance: "",
+  duration: "",
+};
 
 // Middleware para json
 app.use(express.json());
@@ -54,6 +60,12 @@ app.post("/ride/estimate/", async (req, res) => {
         headers: axiosConfig,
       });
 
+      currentSearch.customer_id = req.body.customerId;
+      currentSearch.origin = req.body.origin;
+      currentSearch.destination = req.body.destination;
+      currentSearch.distance = response.data.routes[0].legs[0].distanceMeters;
+      currentSearch.duration = response.data.routes[0].legs[0].duration;
+
       // Calcula a distancia em km
       const distanceKm = response.data.routes[0].legs[0].distanceMeters / 1000;
       const driverOptions = arrayDrivers.drivers.filter(
@@ -85,3 +97,12 @@ app.post("/ride/estimate/", async (req, res) => {
     }
   }
 });
+
+// app.patch("/ride/confirm", async(req, res) => {
+//   if (
+//     req.body.origin != "" ||
+//     req.body.destination != "" ||
+//     req.body.customerId != "" ||
+//     req.body.origin != req.body.destination
+//   )
+// });
